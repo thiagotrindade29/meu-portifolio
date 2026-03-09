@@ -15,6 +15,10 @@ export default function Hero() {
         <Link href="#contato" className="inline-block w-max bg-blue-500 text-white px-10 py-3 font-semibold rounded-lg hover:shadow-[0_10px_36px_rgba(0,0,0,0.15)] hover:-translate-y-1 transition-all duration-300">
           Contato
         </Link>
+        {/* NOVO BOTÃO: Leva direto para a rota /dashboard */}
+        <Link href="/dashboard" className="inline-block w-max bg-[#1a1a2e] text-white px-8 py-3 font-semibold rounded-lg hover:shadow-[0_10px_36px_rgba(0,0,0,0.15)] hover:-translate-y-1 transition-all duration-300 flex items-center gap-2">
+          <i className='bx bx-desktop text-xl'></i> Ver Sistema PCP
+        </Link>
 
         <div className="flex flex-row gap-4 mt-8">
           <a href="https://www.linkedin.com/in/thiago-trindade-351892208/" target="_blank" rel="noopener noreferrer" className="text-2xl text-[#1a1a2e] hover:text-blue-500 transition-colors">
