@@ -1,5 +1,5 @@
 import Hero from '@/components/Hero';
-import Header from '../components/Header'; // Importando o Header para usar em nossa página
+import Header from '@/components/Header'; // Importando o Header para usar em nossa página
 import Sobre from '@/components/Sobre';
 import Habilidades from '@/components/Habilidades';
 import Projetos from '@/components/Projetos';

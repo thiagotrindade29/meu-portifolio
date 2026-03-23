@@ -14,7 +14,7 @@ export default function RootLayout({ children }) {
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet' />
       </head>
       {/* Aqui colocamos as classes gerais que você usava na tag body */}
-      <body className="bg-[#f0f0f0] text-[#1a1a2e] font-['Poppins'] text-[15px] pt-12 md:pt0">
+      <body className="bg-[#f0f0f0] text-[#1a1a2e] font-['Poppins'] text-[15px]  md:pt0">
         {children}</body>
     </html>
   );

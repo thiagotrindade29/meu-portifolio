@@ -13,6 +13,38 @@ export default function Header() {
   };
 
   return (
+    // <header className="bg-white shadow-sm h-16 flex items-center justify-between px-4 md:px-8 border-b min-h-[64px]">
+
+    //   <div className="flex items-center gap-4">
+
+    //     {/* BOTÃO MENU MOBILE */}
+    //     <button
+    //       onClick={() => setMenuOpen(!menuOpen)}
+    //       className="text-2xl md:hidden text-gray-600"
+    //     >
+    //       <i className='bx bx-menu'></i>
+    //     </button>
+
+    //     <h1 className="text-lg md:text-xl font-bold text-gray-800">
+    //       Visão Geral da Operação
+    //     </h1>
+
+    //   </div>
+
+    //   <div className="flex items-center gap-4">
+
+    //     <div className="relative">
+    //       <i className='bx bx-bell text-2xl text-gray-500 cursor-pointer'></i>
+    //       <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full animate-ping"></span>
+    //     </div>
+
+    //     <div className="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+    //       T
+    //     </div>
+
+    //   </div>
+
+    // </header>
     <header className="w-full fixed top-0 left-0 z-50 bg-[#1a1a2e] shadow-md">
       <nav className="max-w-[1024px] mx-auto px-4 h-12 md:h-[4.5rem] flex justify-between items-center font-semibold">
 
@@ -43,16 +75,6 @@ export default function Header() {
         >
           <i className='bx bx-menu'></i>
         </div>
-
-        {/* Adicionei a palavra MENU só para testarmos se o botão aparece */}
-        {/* <div
-          className="text-white text-2xl cursor-pointer md:hidden flex items-center gap-2"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          <span className="text-sm font-bold">MENU</span>
-          <i className='bx bx-menu'></i>
-        </div> */}
-
       </nav>
     </header>
   );
