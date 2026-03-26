@@ -6,6 +6,5 @@ export async function GET() {
     { label: "Em Produção", value: 5 },
     { label: "Finalizadas", value: 7 },
   ];
-
   return NextResponse.json(kpis);
 }
