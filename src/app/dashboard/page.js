@@ -12,25 +12,51 @@ export default function DashboardPCP() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const itemsPerPage = 5;
-  const [darkMode, setDarkMode] = useState(false);
-  // estado de tabela de O.P.s, inicialmente vazio, será preenchido com dados do Supabase
+  // Initialize darkMode from localStorage or default to false
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedDarkMode = localStorage.getItem('darkMode');
+      return savedDarkMode === 'true';
+    }
+    return false;
+  });
   const [ops, setOps] = useState([]);
-
-  // Banco de dados dos KPIs (estático por enquanto)
-  const kpisData = [
+  const [kpisData, setKpisData] = useState([
     { titulo: "OPs em Atraso", valor: "14", icone: "bx-time-five", cor: "text-red-500", fundoIcone: "bg-red-100", status: "+2 desde ontem" },
     { titulo: "Eficiência (OEE)", valor: "87.5%", icone: "bx-trending-up", cor: "text-green-500", fundoIcone: "bg-green-100", status: "Meta: 85%" },
     { titulo: "Volume Expedido", valor: "1.240 un", icone: "bx-package", cor: "text-blue-500", fundoIcone: "bg-blue-100", status: "Volume diário" },
     { titulo: "Gargalo Atual", valor: "Setor de Embalagem", icone: "bx-error-circle", cor: "text-orange-500", fundoIcone: "bg-orange-100", status: "Fila: 300 un" }
-  ];
+  ]);
+  const [loading, setLoading] = useState(true);
 
-  // CÁLCULO DINÂMICO: opsAtrasadas agora usa tabelaData (declarado DEPOIS de tabelaData)
-  const opsAtrasadas = ops.filter(op => op.status === "Atrasado").length;
+useEffect(() => {
+  async function fetchOps() {
+    try {
+      const { data } = await supabase
+        .from("ops")
+        .select("*")
+        .order("created_at", { ascending: false })
+      
+      setOps(data)
+      
+      // Update KPI with real data after fetching
+      const opsAtrasadas = (data || []).filter(op => op.status === "Atrasado").length;
+      setKpisData(prev => {
+        return prev.map((kpi, index) => 
+          index === 0 ? {...kpi, valor: opsAtrasadas.toString()} : kpi
+        );
+      });
+    } catch (error) {
+      console.error('Error fetching OPs:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+  
+  fetchOps();
+}, []);
 
-  // Atualiza o KPI com o valor dinâmico
-  kpisData[0].valor = opsAtrasadas.toString(); // Atualiza o primeiro KPI
-
-  // Função para cor do status
+// Função para cor do status
   const getStatusColor = (status) => {
     switch (status) {
       case 'Concluído': return 'bg-green-100 text-green-700';
@@ -40,22 +66,12 @@ export default function DashboardPCP() {
     }
   };
 
+  // Persist dark mode preference to localStorage
   useEffect(() => {
-
-    async function fetchOps() {
-
-      const { data } = await supabase
-        .from("ops")
-        .select("*")
-        .order("created_at", { ascending: false })
-
-      setOps(data)
-
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('darkMode', darkMode);
     }
-
-    fetchOps()
-
-  }, [])
+  }, [darkMode]);
 
   return (
     <div className={`flex h-screen font-sans ${darkMode ? "bg-[#1a1a2e] text-white" : "bg-gray-100 text-gray-800"}`}>
@@ -126,34 +142,171 @@ export default function DashboardPCP() {
           </button>
         </header>
 
-        {/* ÁREA DE CONTEÚDO */}
-        <div className="flex-1 overflow-y-auto p-8">
-          {/* GRID DOS KPIS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {kpisData.map((kpi, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">
-                      {kpi.titulo}
-                    </p>
-                    <h3 className="text-2xl font-bold text-gray-800">
-                      {kpi.valor}
-                    </h3>
-                  </div>
-                  <div className={`p-3 rounded-lg ${kpi.fundoIcone}`}>
-                    <i className={`bx ${kpi.icone} text-2xl ${kpi.cor}`}></i>
-                  </div>
-                </div>
-                <div className="mt-4 flex items-center text-sm">
-                  <span className="text-gray-400">{kpi.status}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+       {/* ÁREA DE CONTEÚDO */}
+       <div className="flex-1 overflow-y-auto p-8">
+         {/* Loading State */}
+         {loading && (
+           <div className="flex items-center justify-center py-12">
+             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+             <span className="ml-4 text-gray-600">Carregando dados...</span>
+           </div>
+         )}
+         
+         {/* Content */}
+         {!loading && (
+           <>
+             {/* GRID DOS KPIS */}
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+               {kpisData.map((kpi, index) => (
+                 <div
+                   key={index}
+                   className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow"
+                 >
+                   <div className="flex justify-between items-start">
+                     <div>
+                       <p className="text-sm font-medium text-gray-500 mb-1">
+                         {kpi.titulo}
+                       </p>
+                       <h3 className="text-2xl font-bold text-gray-800">
+                         {kpi.valor}
+                       </h3>
+                     </div>
+                     <div className={`p-3 rounded-lg ${kpi.fundoIcone}`}>
+                       <i className={`bx ${kpi.icone} text-2xl ${kpi.cor}`}></i>
+                     </div>
+                   </div>
+                   <div className="mt-4 flex items-center text-sm">
+                     <span className="text-gray-400">{kpi.status}</span>
+                   </div>
+                 </div>
+               ))}
+             </div>
+             
+             {/* Empty State for OPs */}
+             {(!ops || ops.length === 0) && (
+               <div className="text-center py-12">
+                 <i className='bx bx-package text-5xl text-gray-300 mb-4'></i>
+                 <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                   Nenhuma Ordem de Produção encontrada
+                 </h3>
+                 <p className="text-gray-500">
+                   Ainda não há OPs cadastradas. Comece adicionando uma nova OP.
+                 </p>
+               </div>
+             )}
+             
+             {/* OPs Table (only show when we have data) */}
+             {(ops && ops.length > 0) && (
+               <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                 <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+                   <h2 className="text-lg font-bold text-gray-800">
+                     Ordens de Produção Ativas
+                   </h2>
+                   <button className="text-blue-500 hover:text-blue-700 text-sm font-semibold flex items-center gap-1">
+                     Ver todas <i className="bx bx-chevron-right"></i>
+                   </button>
+                 </div>
+                 
+                 {/* overflow-x-auto permite rolar a tabela no celular sem quebrar a tela */}
+                 <div className="overflow-x-auto">
+                   <table className="w-full text-left border-collapse">
+                     <thead>
+                       <tr className="bg-gray-50 text-gray-500 text-sm border-b border-gray-100">
+                         <th className="p-4 font-semibold">ID O.P.</th>
+                         <th className="p-4 font-semibold">Produto</th>
+                         <th className="p-4 font-semibold">Qtde</th>
+                         <th className="p-4 font-semibold">Setor Atual</th>
+                         <th className="p-4 font-semibold">Previsão</th>
+                         <th className="p-4 font-semibold">Status</th>
+                       </tr>
+                     </thead>
+                     <tbody className="text-sm text-gray-700">
+                       {/* MAP COM FILTRO APLICADO */}
+                       {ops.filter(op =>
+                         op.produto.toLowerCase().includes(search.toLowerCase()) ||
+                         op.id.toLowerCase().includes(search.toLowerCase())
+                       ).slice((page - 1) * itemsPerPage, page * itemsPerPage)
+                         .map((linha, index) => (
+                           <tr
+                             key={index}
+                             className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
+                           >
+                             <td className="p-4 font-medium text-blue-600">
+                               {linha.numero_op}
+                             </td>
+                             <td className="p-4 font-semibold">{linha.produto}</td>
+                             <td className="p-4">{linha.qtde} un</td>
+                             <td className="p-4 text-gray-500">{linha.setor}</td>
+                             <td className="p-4">{linha.previsao}</td>
+                             <td className="p-4">
+                               {/* Chamando a função para dar a cor da "etiqueta" (badge) */}
+                               <select
+                                 className={`px-3 py-1 rounded text-xs font-bold ${getStatusColor(linha.status)}`}
+                                 value={linha.status}
+                                 onChange={async (e) => {
+                                   const newStatus = e.target.value;
+                                   
+                                   // Optimistic update: update UI immediately
+                                   setOps(prevOps => 
+                                     prevOps.map(op => 
+                                       op.id === linha.id 
+                                         ? { ...op, status: newStatus } 
+                                         : op
+                                     )
+                                   );
+                                   
+                                   // Update in background
+                                   const { error } = await supabase
+                                     .from('ops')
+                                     .update({ status: newStatus })
+                                     .eq('id', linha.id);
+                                   
+                                   if (error) {
+                                     // Rollback on error
+                                     setOps(prevOps => 
+                                       prevOps.map(op => 
+                                         op.id === linha.id 
+                                           ? { ...op, status: linha.status } 
+                                           : op
+                                       )
+                                     );
+                                     console.error('Error updating OP status:', error);
+                                   }
+                                 }}
+                               >
+                                 <option>Aguardando</option>
+                                 <option>Em Produção</option>
+                                 <option>Atrasado</option>
+                                 <option>Concluído</option>
+                               </select>
+                             </td>
+                           </tr>
+                         ))}
+                     </tbody>
+                   </table>
+                   <div className="flex justify-center gap-4 mt-4">
+                     <button
+                       onClick={() => setPage(p => Math.max(1, p - 1))}
+                       disabled={page === 1}
+                       className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+                     >
+                       Anterior
+                     </button>
+                     <span>Página {page} de {Math.ceil((ops?.length || 0) / itemsPerPage)}</span>
+                     <button
+                       onClick={() => setPage(p => p + 1)}
+                       disabled={page === Math.ceil((ops?.length || 0) / itemsPerPage)}
+                       className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+                     >
+                       Próxima
+                     </button>
+                   </div>
+                 </div>
+                 <AddOPForm onAdd={(newOp) => setOps([newOp, ...ops])} />
+               </div>
+             )}
+           </>
+         )}
           {/* GRÁFICO DE PRODUÇÃO */}
           <div className="grid md:grid-cols-2 gap-6 mb-8">
             <ProductionChart />
@@ -212,29 +365,48 @@ export default function DashboardPCP() {
                         <td className="p-4">{linha.qtde} un</td>
                         <td className="p-4 text-gray-500">{linha.setor}</td>
                         <td className="p-4">{linha.previsao}</td>
-                        <td className="p-4">
-                          {/* Chamando a função para dar a cor da "etiqueta" (badge) */}
-                          <select
-                            className={`px-3 py-1 rounded text-xs font-bold ${getStatusColor(linha.status)}`}
-                            value={linha.status}
-                            onChange={async (e) => {
-                              const newStatus = e.target.value;
-                              const { error } = await supabase
-                                .from('ops')
-                                .update({ status: newStatus })
-                                .eq('id', linha.id);
-                              if (!error) {
-                                // Atualize estado local
-                                setOps(ops.map(op => op.id === linha.id ? { ...op, status: newStatus } : op));
-                              }
-                            }}
-                          >
-                            <option>Aguardando</option>
-                            <option>Em Produção</option>
-                            <option>Atrasado</option>
-                            <option>Concluído</option>
-                          </select>
-                        </td>
+<td className="p-4">
+                           {/* Chamando a função para dar a cor da "etiqueta" (badge) */}
+                           <select
+                             className={`px-3 py-1 rounded text-xs font-bold ${getStatusColor(linha.status)}`}
+                             value={linha.status}
+                             onChange={async (e) => {
+                               const newStatus = e.target.value;
+                               
+                               // Optimistic update: update UI immediately
+                               setOps(prevOps => 
+                                 prevOps.map(op => 
+                                   op.id === linha.id 
+                                     ? { ...op, status: newStatus } 
+                                     : op
+                                 )
+                               );
+                               
+                               // Update in background
+                               const { error } = await supabase
+                                 .from('ops')
+                                 .update({ status: newStatus })
+                                 .eq('id', linha.id);
+                               
+                               if (error) {
+                                 // Rollback on error
+                                 setOps(prevOps => 
+                                   prevOps.map(op => 
+                                     op.id === linha.id 
+                                       ? { ...op, status: linha.status } 
+                                       : op
+                                   )
+                                 );
+                                 console.error('Error updating OP status:', error);
+                               }
+                             }}
+                           >
+                             <option>Aguardando</option>
+                             <option>Em Produção</option>
+                             <option>Atrasado</option>
+                             <option>Concluído</option>
+                           </select>
+                         </td>
                       </tr>
                     ))}
                 </tbody>
