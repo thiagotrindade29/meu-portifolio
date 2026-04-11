@@ -349,7 +349,7 @@ useEffect(() => {
                 </thead>
                 <tbody className="text-sm text-gray-700">
                   {/* MAP COM FILTRO APLICADO */}
-                  {ops.filter(op =>
+                  {(ops || []).filter(op =>
                     op.produto.toLowerCase().includes(search.toLowerCase()) ||
                     op.id.toLowerCase().includes(search.toLowerCase())
                   ).slice((page - 1) * itemsPerPage, page * itemsPerPage)
