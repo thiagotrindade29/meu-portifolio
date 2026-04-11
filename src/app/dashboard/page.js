@@ -197,21 +197,21 @@ useEffect(() => {
              
              {/* OPs Table (only show when we have data) */}
              {(ops && ops.length > 0) && (
-               <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                 <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                   <h2 className="text-lg font-bold text-gray-800">
+               <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+                 <div className="p-6 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center">
+                   <h2 className="text-lg font-bold text-gray-800 dark:text-slate-100">
                      Ordens de Produção Ativas
                    </h2>
-                   <button className="text-blue-500 hover:text-blue-700 text-sm font-semibold flex items-center gap-1">
+                   <button className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-semibold flex items-center gap-1">
                      Ver todas <i className="bx bx-chevron-right"></i>
                    </button>
                  </div>
-                 
+
                  {/* overflow-x-auto permite rolar a tabela no celular sem quebrar a tela */}
                  <div className="overflow-x-auto">
                    <table className="w-full text-left border-collapse">
                      <thead>
-                       <tr className="bg-gray-50 text-gray-500 text-sm border-b border-gray-100">
+                       <tr className="bg-gray-50 dark:bg-slate-700/50 text-gray-500 dark:text-slate-400 text-sm border-b border-gray-100 dark:border-slate-700">
                          <th className="p-4 font-semibold">ID O.P.</th>
                          <th className="p-4 font-semibold">Produto</th>
                          <th className="p-4 font-semibold">Qtde</th>
@@ -220,7 +220,7 @@ useEffect(() => {
                          <th className="p-4 font-semibold">Status</th>
                        </tr>
                      </thead>
-                     <tbody className="text-sm text-gray-700">
+                     <tbody className="text-sm text-gray-700 dark:text-slate-300">
                        {/* MAP COM FILTRO APLICADO */}
                        {ops.filter(op =>
                          op.produto.toLowerCase().includes(search.toLowerCase()) ||
@@ -229,15 +229,15 @@ useEffect(() => {
                          .map((linha, index) => (
                            <tr
                              key={index}
-                             className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
+                             className="border-b border-gray-50 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
                            >
-                             <td className="p-4 font-medium text-blue-600">
+                             <td className="p-4 font-medium text-blue-600 dark:text-blue-400">
                                {linha.numero_op}
                              </td>
-                             <td className="p-4 font-semibold">{linha.produto}</td>
-                             <td className="p-4">{linha.qtde} un</td>
-                             <td className="p-4 text-gray-500">{linha.setor}</td>
-                             <td className="p-4">{linha.previsao}</td>
+                             <td className="p-4 font-semibold dark:text-slate-100">{linha.produto}</td>
+                             <td className="p-4 dark:text-slate-300">{linha.qtde} un</td>
+                             <td className="p-4 text-gray-500 dark:text-slate-400">{linha.setor}</td>
+                             <td className="p-4 dark:text-slate-300">{linha.previsao}</td>
                              <td className="p-4">
                                {/* Chamando a função para dar a cor da "etiqueta" (badge) */}
                                <select
@@ -245,28 +245,28 @@ useEffect(() => {
                                  value={linha.status}
                                  onChange={async (e) => {
                                    const newStatus = e.target.value;
-                                   
+
                                    // Optimistic update: update UI immediately
-                                   setOps(prevOps => 
-                                     prevOps.map(op => 
-                                       op.id === linha.id 
-                                         ? { ...op, status: newStatus } 
+                                   setOps(prevOps =>
+                                     prevOps.map(op =>
+                                       op.id === linha.id
+                                         ? { ...op, status: newStatus }
                                          : op
                                      )
                                    );
-                                   
+
                                    // Update in background
                                    const { error } = await supabase
                                      .from('ops')
                                      .update({ status: newStatus })
                                      .eq('id', linha.id);
-                                   
+
                                    if (error) {
                                      // Rollback on error
-                                     setOps(prevOps => 
-                                       prevOps.map(op => 
-                                         op.id === linha.id 
-                                           ? { ...op, status: linha.status } 
+                                     setOps(prevOps =>
+                                       prevOps.map(op =>
+                                         op.id === linha.id
+                                           ? { ...op, status: linha.status }
                                            : op
                                        )
                                      );
@@ -288,15 +288,15 @@ useEffect(() => {
                      <button
                        onClick={() => setPage(p => Math.max(1, p - 1))}
                        disabled={page === 1}
-                       className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+                       className="px-4 py-2 bg-gray-200 dark:bg-slate-700 dark:text-white rounded disabled:opacity-50"
                      >
                        Anterior
                      </button>
-                     <span>Página {page} de {Math.ceil((ops?.length || 0) / itemsPerPage)}</span>
+                     <span className="dark:text-slate-300">Página {page} de {Math.ceil((ops?.length || 0) / itemsPerPage)}</span>
                      <button
                        onClick={() => setPage(p => p + 1)}
                        disabled={page === Math.ceil((ops?.length || 0) / itemsPerPage)}
-                       className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+                       className="px-4 py-2 bg-gray-200 dark:bg-slate-700 dark:text-white rounded disabled:opacity-50"
                      >
                        Próxima
                      </button>
