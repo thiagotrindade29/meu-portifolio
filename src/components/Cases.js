@@ -19,9 +19,9 @@ export default function Cases() {
   ];
 
   return (
-    <section className="max-w-[1024px] mx-auto px-4 py-16 md:py-24 dark:bg-slate-900 transition-colors" id="cases">
+    <section className="max-w-[1024px] mx-auto px-4 py-16 md:py-24  transition-colors" id="cases">
       {/* Título da Seção */}
-      <h2 className="relative text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 text-center mb-16 after:content-[''] after:absolute after:w-16 after:h-1 after:bg-slate-900 dark:after:bg-slate-100 after:left-0 after:right-0 after:mx-auto after:-bottom-4">
+      <h2 className="relative text-2xl md:text-3xl font-bold text-slate-900  text-center mb-16 after:content-[''] after:absolute after:w-16 after:h-1 after:bg-slate-900 dark:after:bg-slate-900 after:left-0 after:right-0 after:mx-auto after:-bottom-4">
         Cases de Sucesso
       </h2>
 

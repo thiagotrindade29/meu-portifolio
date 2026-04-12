@@ -29,34 +29,34 @@ export default function DashboardPCP() {
   ]);
   const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  async function fetchOps() {
-    try {
-      const { data } = await supabase
-        .from("ops")
-        .select("*")
-        .order("created_at", { ascending: false })
-      
-      setOps(data)
-      
-      // Update KPI with real data after fetching
-      const opsAtrasadas = (data || []).filter(op => op.status === "Atrasado").length;
-      setKpisData(prev => {
-        return prev.map((kpi, index) => 
-          index === 0 ? {...kpi, valor: opsAtrasadas.toString()} : kpi
-        );
-      });
-    } catch (error) {
-      console.error('Error fetching OPs:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
-  
-  fetchOps();
-}, []);
+  useEffect(() => {
+    async function fetchOps() {
+      try {
+        const { data } = await supabase
+          .from("ops")
+          .select("*")
+          .order("created_at", { ascending: false })
 
-// Função para cor do status
+        setOps(data)
+
+        // Update KPI with real data after fetching
+        const opsAtrasadas = (data || []).filter(op => op.status === "Atrasado").length;
+        setKpisData(prev => {
+          return prev.map((kpi, index) =>
+            index === 0 ? { ...kpi, valor: opsAtrasadas.toString() } : kpi
+          );
+        });
+      } catch (error) {
+        console.error('Error fetching OPs:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchOps();
+  }, []);
+
+  // Função para cor do status
   const getStatusColor = (status) => {
     switch (status) {
       case 'Concluído': return 'bg-green-100 text-green-700';
@@ -142,297 +142,301 @@ useEffect(() => {
           </button>
         </header>
 
-       {/* ÁREA DE CONTEÚDO */}
-       <div className="flex-1 overflow-y-auto p-8">
-         {/* Loading State */}
-         {loading && (
-           <div className="flex items-center justify-center py-12">
-             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-             <span className="ml-4 text-gray-600">Carregando dados...</span>
-           </div>
-         )}
-         
-         {/* Content */}
-         {!loading && (
-           <>
-             {/* GRID DOS KPIS */}
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-               {kpisData.map((kpi, index) => (
-                 <div
-                   key={index}
-                   className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow"
-                 >
-                   <div className="flex justify-between items-start">
-                     <div>
-                       <p className="text-sm font-medium text-gray-500 mb-1">
-                         {kpi.titulo}
-                       </p>
-                       <h3 className="text-2xl font-bold text-gray-800">
-                         {kpi.valor}
-                       </h3>
-                     </div>
-                     <div className={`p-3 rounded-lg ${kpi.fundoIcone}`}>
-                       <i className={`bx ${kpi.icone} text-2xl ${kpi.cor}`}></i>
-                     </div>
-                   </div>
-                   <div className="mt-4 flex items-center text-sm">
-                     <span className="text-gray-400">{kpi.status}</span>
-                   </div>
-                 </div>
-               ))}
-             </div>
-             
-             {/* Empty State for OPs */}
-             {(!ops || ops.length === 0) && (
-               <div className="text-center py-12">
-                 <i className='bx bx-package text-5xl text-gray-300 mb-4'></i>
-                 <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                   Nenhuma Ordem de Produção encontrada
-                 </h3>
-                 <p className="text-gray-500">
-                   Ainda não há OPs cadastradas. Comece adicionando uma nova OP.
-                 </p>
-               </div>
-             )}
-             
-             {/* OPs Table (only show when we have data) */}
-             {(ops && ops.length > 0) && (
-               <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
-                 <div className="p-6 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center">
-                   <h2 className="text-lg font-bold text-gray-800 dark:text-slate-100">
-                     Ordens de Produção Ativas
-                   </h2>
-                   <button className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-semibold flex items-center gap-1">
-                     Ver todas <i className="bx bx-chevron-right"></i>
-                   </button>
-                 </div>
-
-                 {/* overflow-x-auto permite rolar a tabela no celular sem quebrar a tela */}
-                 <div className="overflow-x-auto">
-                   <table className="w-full text-left border-collapse">
-                     <thead>
-                       <tr className="bg-gray-50 dark:bg-slate-700/50 text-gray-500 dark:text-slate-400 text-sm border-b border-gray-100 dark:border-slate-700">
-                         <th className="p-4 font-semibold">ID O.P.</th>
-                         <th className="p-4 font-semibold">Produto</th>
-                         <th className="p-4 font-semibold">Qtde</th>
-                         <th className="p-4 font-semibold">Setor Atual</th>
-                         <th className="p-4 font-semibold">Previsão</th>
-                         <th className="p-4 font-semibold">Status</th>
-                       </tr>
-                     </thead>
-                     <tbody className="text-sm text-gray-700 dark:text-slate-300">
-                       {/* MAP COM FILTRO APLICADO */}
-                       {ops.filter(op =>
-                         op.produto.toLowerCase().includes(search.toLowerCase()) ||
-                         op.id.toLowerCase().includes(search.toLowerCase())
-                       ).slice((page - 1) * itemsPerPage, page * itemsPerPage)
-                         .map((linha, index) => (
-                           <tr
-                             key={index}
-                             className="border-b border-gray-50 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
-                           >
-                             <td className="p-4 font-medium text-blue-600 dark:text-blue-400">
-                               {linha.numero_op}
-                             </td>
-                             <td className="p-4 font-semibold dark:text-slate-100">{linha.produto}</td>
-                             <td className="p-4 dark:text-slate-300">{linha.qtde} un</td>
-                             <td className="p-4 text-gray-500 dark:text-slate-400">{linha.setor}</td>
-                             <td className="p-4 dark:text-slate-300">{linha.previsao}</td>
-                             <td className="p-4">
-                               {/* Chamando a função para dar a cor da "etiqueta" (badge) */}
-                               <select
-                                 className={`px-3 py-1 rounded text-xs font-bold ${getStatusColor(linha.status)}`}
-                                 value={linha.status}
-                                 onChange={async (e) => {
-                                   const newStatus = e.target.value;
-
-                                   // Optimistic update: update UI immediately
-                                   setOps(prevOps =>
-                                     prevOps.map(op =>
-                                       op.id === linha.id
-                                         ? { ...op, status: newStatus }
-                                         : op
-                                     )
-                                   );
-
-                                   // Update in background
-                                   const { error } = await supabase
-                                     .from('ops')
-                                     .update({ status: newStatus })
-                                     .eq('id', linha.id);
-
-                                   if (error) {
-                                     // Rollback on error
-                                     setOps(prevOps =>
-                                       prevOps.map(op =>
-                                         op.id === linha.id
-                                           ? { ...op, status: linha.status }
-                                           : op
-                                       )
-                                     );
-                                     console.error('Error updating OP status:', error);
-                                   }
-                                 }}
-                               >
-                                 <option>Aguardando</option>
-                                 <option>Em Produção</option>
-                                 <option>Atrasado</option>
-                                 <option>Concluído</option>
-                               </select>
-                             </td>
-                           </tr>
-                         ))}
-                     </tbody>
-                   </table>
-                   <div className="flex justify-center gap-4 mt-4">
-                     <button
-                       onClick={() => setPage(p => Math.max(1, p - 1))}
-                       disabled={page === 1}
-                       className="px-4 py-2 bg-gray-200 dark:bg-slate-700 dark:text-white rounded disabled:opacity-50"
-                     >
-                       Anterior
-                     </button>
-                     <span className="dark:text-slate-300">Página {page} de {Math.ceil((ops?.length || 0) / itemsPerPage)}</span>
-                     <button
-                       onClick={() => setPage(p => p + 1)}
-                       disabled={page === Math.ceil((ops?.length || 0) / itemsPerPage)}
-                       className="px-4 py-2 bg-gray-200 dark:bg-slate-700 dark:text-white rounded disabled:opacity-50"
-                     >
-                       Próxima
-                     </button>
-                   </div>
-                 </div>
-                 <AddOPForm onAdd={(newOp) => setOps([newOp, ...ops])} />
-               </div>
-             )}
-           </>
-         )}
-          {/* GRÁFICO DE PRODUÇÃO */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <ProductionChart />
-          </div>
-
-          {/* BUSCA */}
-          <div className="mb-4">
-            <input
-              type="text"
-              placeholder="Buscar OP ou produto..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="border px-4 py-2 rounded w-full md:w-80"
-            />
-          </div>
-
-          {/* NOVA SEÇÃO: TABELA DE O.P.s */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h2 className="text-lg font-bold text-gray-800">
-                Ordens de Produção Ativas
-              </h2>
-              <button className="text-blue-500 hover:text-blue-700 text-sm font-semibold flex items-center gap-1">
-                Ver todas <i className="bx bx-chevron-right"></i>
-              </button>
+        {/* ÁREA DE CONTEÚDO */}
+        <div className="flex-1 overflow-y-auto p-8">
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              <span className="ml-4 text-gray-600">Carregando dados...</span>
             </div>
+          )}
 
-            {/* overflow-x-auto permite rolar a tabela no celular sem quebrar a tela */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-gray-50 text-gray-500 text-sm border-b border-gray-100">
-                    <th className="p-4 font-semibold">ID O.P.</th>
-                    <th className="p-4 font-semibold">Produto</th>
-                    <th className="p-4 font-semibold">Qtde</th>
-                    <th className="p-4 font-semibold">Setor Atual</th>
-                    <th className="p-4 font-semibold">Previsão</th>
-                    <th className="p-4 font-semibold">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm text-gray-700">
-                  {/* MAP COM FILTRO APLICADO */}
-                  {(ops || []).filter(op =>
-                    op.produto.toLowerCase().includes(search.toLowerCase()) ||
-                    op.id.toLowerCase().includes(search.toLowerCase())
-                  ).slice((page - 1) * itemsPerPage, page * itemsPerPage)
-                    .map((linha, index) => (
-                      <tr
-                        key={index}
-                        className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="p-4 font-medium text-blue-600">
-                          {linha.numero_op}
-                        </td>
-                        <td className="p-4 font-semibold">{linha.produto}</td>
-                        <td className="p-4">{linha.qtde} un</td>
-                        <td className="p-4 text-gray-500">{linha.setor}</td>
-                        <td className="p-4">{linha.previsao}</td>
-<td className="p-4">
-                           {/* Chamando a função para dar a cor da "etiqueta" (badge) */}
-                           <select
-                             className={`px-3 py-1 rounded text-xs font-bold ${getStatusColor(linha.status)}`}
-                             value={linha.status}
-                             onChange={async (e) => {
-                               const newStatus = e.target.value;
-                               
-                               // Optimistic update: update UI immediately
-                               setOps(prevOps => 
-                                 prevOps.map(op => 
-                                   op.id === linha.id 
-                                     ? { ...op, status: newStatus } 
-                                     : op
-                                 )
-                               );
-                               
-                               // Update in background
-                               const { error } = await supabase
-                                 .from('ops')
-                                 .update({ status: newStatus })
-                                 .eq('id', linha.id);
-                               
-                               if (error) {
-                                 // Rollback on error
-                                 setOps(prevOps => 
-                                   prevOps.map(op => 
-                                     op.id === linha.id 
-                                       ? { ...op, status: linha.status } 
-                                       : op
-                                   )
-                                 );
-                                 console.error('Error updating OP status:', error);
-                               }
-                             }}
-                           >
-                             <option>Aguardando</option>
-                             <option>Em Produção</option>
-                             <option>Atrasado</option>
-                             <option>Concluído</option>
-                           </select>
-                         </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-              <div className="flex justify-center gap-4 mt-4">
-                <button
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-                >
-                  Anterior
-                </button>
-                <span>Página {page} de {Math.ceil(ops.length / itemsPerPage)}</span>
-                <button
-                  onClick={() => setPage(p => p + 1)}
-                  disabled={page === Math.ceil(ops.length / itemsPerPage)}
-                  className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-                >
-                  Próxima
-                </button>
+          {/* Content */}
+          {!loading && (
+            <>
+              {/* GRID DOS KPIS */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {kpisData.map((kpi, index) => (
+                  <div
+                    key={index}
+                    className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 mb-1">
+                          {kpi.titulo}
+                        </p>
+                        <h3 className="text-2xl font-bold text-gray-800">
+                          {kpi.valor}
+                        </h3>
+                      </div>
+                      <div className={`p-3 rounded-lg ${kpi.fundoIcone}`}>
+                        <i className={`bx ${kpi.icone} text-2xl ${kpi.cor}`}></i>
+                      </div>
+                    </div>
+                    <div className="mt-4 flex items-center text-sm">
+                      <span className="text-gray-400">{kpi.status}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-            <AddOPForm onAdd={(newOp) => setOps([newOp, ...ops])} />
-          </div>
+
+              {/* Empty State for OPs */}
+              {(!ops || ops.length === 0) && (
+                <div className="text-center py-12">
+                  <i className='bx bx-package text-5xl text-gray-300 mb-4'></i>
+                  <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                    Nenhuma Ordem de Produção encontrada
+                  </h3>
+                  <p className="text-gray-500">
+                    Ainda não há OPs cadastradas. Comece adicionando uma nova OP.
+                  </p>
+                </div>
+              )}
+
+              {/* GRÁFICO DE PRODUÇÃO */}
+              <div className="grid md:grid-cols-2 gap-6 mb-8">
+                <ProductionChart />
+              </div>
+
+              {/* BUSCA */}
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Buscar OP ou produto..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="border px-4 py-2 rounded w-full md:w-80"
+                />
+              </div>
+
+              {/* OPs Table (only show when we have data) */}
+              {(ops && ops.length > 0) && (
+                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+                  <div className="p-6 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center">
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-slate-100">
+                      Ordens de Produção Ativas
+                    </h2>
+                    <button className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-semibold flex items-center gap-1">
+                      Ver todas <i className="bx bx-chevron-right"></i>
+                    </button>
+                  </div>
+
+                  {/* overflow-x-auto permite rolar a tabela no celular sem quebrar a tela */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-gray-50 dark:bg-slate-700/50 text-gray-500 dark:text-slate-400 text-sm border-b border-gray-100 dark:border-slate-700">
+                          <th className="p-4 font-semibold">ID O.P.</th>
+                          <th className="p-4 font-semibold">Produto</th>
+                          <th className="p-4 font-semibold">Qtde</th>
+                          <th className="p-4 font-semibold">Setor Atual</th>
+                          <th className="p-4 font-semibold">Previsão</th>
+                          <th className="p-4 font-semibold">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-sm text-gray-700 dark:text-slate-300">
+                        {/* MAP COM FILTRO APLICADO */}
+                        {ops.filter(op =>
+                          op.produto.toLowerCase().includes(search.toLowerCase()) ||
+                          op.id.toLowerCase().includes(search.toLowerCase())
+                        ).slice((page - 1) * itemsPerPage, page * itemsPerPage)
+                          .map((linha, index) => (
+                            <tr
+                              key={index}
+                              className="border-b border-gray-50 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                            >
+                              <td className="p-4 font-medium text-blue-600 dark:text-blue-400">
+                                {linha.numero_op}
+                              </td>
+                              <td className="p-4 font-semibold dark:text-slate-100">{linha.produto}</td>
+                              <td className="p-4 dark:text-slate-300">{linha.qtde} un</td>
+                              <td className="p-4 text-gray-500 dark:text-slate-400">{linha.setor}</td>
+                              <td className="p-4 dark:text-slate-300">{linha.previsao}</td>
+                              <td className="p-4">
+                                {/* Chamando a função para dar a cor da "etiqueta" (badge) */}
+                                <select
+                                  className={`px-3 py-1 rounded text-xs font-bold ${getStatusColor(linha.status)}`}
+                                  value={linha.status}
+                                  onChange={async (e) => {
+                                    const newStatus = e.target.value;
+
+                                    // Optimistic update: update UI immediately
+                                    setOps(prevOps =>
+                                      prevOps.map(op =>
+                                        op.id === linha.id
+                                          ? { ...op, status: newStatus }
+                                          : op
+                                      )
+                                    );
+
+                                    // Update in background
+                                    const { error } = await supabase
+                                      .from('ops')
+                                      .update({ status: newStatus })
+                                      .eq('id', linha.id);
+
+                                    if (error) {
+                                      // Rollback on error
+                                      setOps(prevOps =>
+                                        prevOps.map(op =>
+                                          op.id === linha.id
+                                            ? { ...op, status: linha.status }
+                                            : op
+                                        )
+                                      );
+                                      console.error('Error updating OP status:', error);
+                                    }
+                                  }}
+                                >
+                                  <option>Aguardando</option>
+                                  <option>Em Produção</option>
+                                  <option>Atrasado</option>
+                                  <option>Concluído</option>
+                                </select>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                    <div className="flex justify-center gap-4 mt-4">
+                      <button
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        className="px-4 py-2 bg-gray-200 dark:bg-slate-700 dark:text-white rounded disabled:opacity-50"
+                      >
+                        Anterior
+                      </button>
+                      <span className="dark:text-slate-300">Página {page} de {Math.ceil((ops?.length || 0) / itemsPerPage)}</span>
+                      <button
+                        onClick={() => setPage(p => p + 1)}
+                        disabled={page === Math.ceil((ops?.length || 0) / itemsPerPage)}
+                        className="px-4 py-2 bg-gray-200 dark:bg-slate-700 dark:text-white rounded disabled:opacity-50"
+                      >
+                        Próxima
+                      </button>
+                    </div>
+                  </div>
+                  <AddOPForm onAdd={(newOp) => setOps([newOp, ...ops])} />
+                </div>
+              )}
+            </>
+          )}
         </div>
       </main>
     </div>
   );
 }
+
+
+
+
+
+{/* NOVA SEÇÃO: TABELA DE O.P.s */ }
+// <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+//   <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+//     <h2 className="text-lg font-bold text-gray-800">
+//       Ordens de Produção Ativas
+//     </h2>
+//     <button className="text-blue-500 hover:text-blue-700 text-sm font-semibold flex items-center gap-1">
+//       Ver todas <i className="bx bx-chevron-right"></i>
+//     </button>
+//   </div>
+
+//   {/* overflow-x-auto permite rolar a tabela no celular sem quebrar a tela */}
+//   <div className="overflow-x-auto">
+//     <table className="w-full text-left border-collapse">
+//       <thead>
+//         <tr className="bg-gray-50 text-gray-500 text-sm border-b border-gray-100">
+//           <th className="p-4 font-semibold">ID O.P.</th>
+//           <th className="p-4 font-semibold">Produto</th>
+//           <th className="p-4 font-semibold">Qtde</th>
+//           <th className="p-4 font-semibold">Setor Atual</th>
+//           <th className="p-4 font-semibold">Previsão</th>
+//           <th className="p-4 font-semibold">Status</th>
+//         </tr>
+//       </thead>
+//       <tbody className="text-sm text-gray-700">
+//         {/* MAP COM FILTRO APLICADO */}
+//         {(ops || []).filter(op =>
+//           op.produto.toLowerCase().includes(search.toLowerCase()) ||
+//           op.id.toLowerCase().includes(search.toLowerCase())
+//         ).slice((page - 1) * itemsPerPage, page * itemsPerPage)
+//           .map((linha, index) => (
+//             <tr
+//               key={index}
+//               className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
+//             >
+//               <td className="p-4 font-medium text-blue-600">
+//                 {linha.numero_op}
+//               </td>
+//               <td className="p-4 font-semibold">{linha.produto}</td>
+//               <td className="p-4">{linha.qtde} un</td>
+//               <td className="p-4 text-gray-500">{linha.setor}</td>
+//               <td className="p-4">{linha.previsao}</td><td className="p-4">
+//                 {/* Chamando a função para dar a cor da "etiqueta" (badge) */}
+//                 <select
+//                   className={`px-3 py-1 rounded text-xs font-bold ${getStatusColor(linha.status)}`}
+//                   value={linha.status}
+//                   onChange={async (e) => {
+//                     const newStatus = e.target.value;
+
+//                     // Optimistic update: update UI immediately
+//                     setOps(prevOps =>
+//                       prevOps.map(op =>
+//                         op.id === linha.id
+//                           ? { ...op, status: newStatus }
+//                           : op
+//                       )
+//                     );
+
+//                     // Update in background
+//                     const { error } = await supabase
+//                       .from('ops')
+//                       .update({ status: newStatus })
+//                       .eq('id', linha.id);
+
+//                     if (error) {
+//                       // Rollback on error
+//                       setOps(prevOps =>
+//                         prevOps.map(op =>
+//                           op.id === linha.id
+//                             ? { ...op, status: linha.status }
+//                             : op
+//                         )
+//                       );
+//                       console.error('Error updating OP status:', error);
+//                     }
+//                   }}
+//                 >
+//                   <option>Aguardando</option>
+//                   <option>Em Produção</option>
+//                   <option>Atrasado</option>
+//                   <option>Concluído</option>
+//                 </select>
+//               </td>
+//             </tr>
+//           ))}
+//       </tbody>
+//     </table>
+//     <div className="flex justify-center gap-4 mt-4">
+//       <button
+//         onClick={() => setPage(p => Math.max(1, p - 1))}
+//         disabled={page === 1}
+//         className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+//       >
+//         Anterior
+//       </button>
+//       <span>Página {page} de {Math.ceil(ops.length / itemsPerPage)}</span>
+//       <button
+//         onClick={() => setPage(p => p + 1)}
+//         disabled={page === Math.ceil(ops.length / itemsPerPage)}
+//         className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+//       >
+//         Próxima
+//       </button>
+//     </div>
+//   </div>
+//   <AddOPForm onAdd={(newOp) => setOps([newOp, ...ops])} />
+// </div>

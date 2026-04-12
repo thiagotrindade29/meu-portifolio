@@ -27,7 +27,7 @@ export default function Contato() {
   return (
     <section className="max-w-[1024px] mx-auto px-4 py-16 md:py-24" id="contato">
 
-      <h2 className="relative text-2xl md:text-3xl font-bold text-[#1a1a2e] text-center mb-16 after:content-[''] after:absolute after:w-16 after:h-1 after:bg-blue-500 after:left-0 after:right-0 after:mx-auto after:-bottom-4">
+      <h2 className="relative text-2xl md:text-3xl font-bold text-[#1a1a2e] text-center mb-16 after:content-[''] after:absolute after:w-16 after:h-1 after:bg-slate-900 after:left-0 after:right-0 after:mx-auto after:-bottom-4">
         Contato
       </h2>
 

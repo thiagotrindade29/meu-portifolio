@@ -7,31 +7,31 @@ export default function Projetos() {
   // Nosso "banco de dados" de projetos com categorias
   const projetosData = [
     {
-      imagem: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&auto=format&fit=crop&q=60",
+      imagem: "https://facil123.com.br/wp-content/uploads/as-5-melhores-dicas-para-uma-gestao-de-estoque-eficiente.jpg?w=500&auto=format&fit=crop&q=60",
       titulo: "Otimização de Fluxo de Estoque",
       descricao: "Desenvolvi um sistema de gerenciamento de estoque com Python e SQLite, reduzindo falhas de inventário e otimizando o tempo de resposta em relatórios operacionais.",
       categoria: "Backend"
     },
     {
-      imagem: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&auto=format&fit=crop&q=60",
+      imagem: "https://cndl.org.br/varejosa/wp-content/uploads/2024/08/Como-PMEs-podem-utilizar-dados-para-melhorar-a-experiencia-do-cliente.jpg?w=500&auto=format&fit=crop&q=60",
       titulo: "Inteligência de Dados de Vendas",
       descricao: "Implementei análises avançadas com Excel e Power BI para transformar dados brutos em insights estratégicos, identificando gargalos de venda e oportunidades de crescimento.",
       categoria: "Data Analysis"
     },
     {
-      imagem: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=500&auto=format&fit=crop&q=60",
+      imagem: "https://static.vecteezy.com/ti/vetor-gratis/p1/12962636-infograficos-rpa-processo-de-automacao-de-processos-de-robos-vetor.jpg?w=500&auto=format&fit=crop&q=60",
       titulo: "Automação de Processos RPA",
       descricao: "Criei automações de tarefas repetitivas utilizando RPA, eliminando erros manuais e aumentando a produtividade de rotinas administrativas.",
       categoria: "Automation"
     },
     {
-      imagem: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&auto=format&fit=crop&q=60",
+      imagem: "https://i.postimg.cc/pTg06wp1/gestaopcp.png?w=500&auto=format&fit=crop&q=60",
       titulo: "Ecossistema de Gestão PCP",
       descricao: "Solução end-to-end para controle de produção. Integração de KPIs em tempo real e gestão dinâmica de OPs, unindo conceitos de Engenharia de Produção com desenvolvimento Fullstack.",
       categoria: "Frontend"
     },
     {
-      imagem: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&auto=format&fit=crop&q=60",
+      imagem: "https://assets.apidog.com/blog/2024/08/image-158.png?w=500&auto=format&fit=crop&q=60",
       titulo: "Infraestrutura de Dados Supabase",
       descricao: "Arquitetura de API RESTful para integração escalável com Supabase, focando em segurança, autenticação e alta disponibilidade de dados.",
       categoria: "Backend"
@@ -40,8 +40,8 @@ export default function Projetos() {
 
   const [filterCategoria, setFilterCategoria] = useState('Todas');
   const categorias = ['Todas', ...new Set(projetosData.map(p => p.categoria))];
-  const projetosFiltrados = filterCategoria === 'Todas' 
-    ? projetosData 
+  const projetosFiltrados = filterCategoria === 'Todas'
+    ? projetosData
     : projetosData.filter(p => p.categoria === filterCategoria);
 
   return (
@@ -81,7 +81,7 @@ export default function Projetos() {
             descricao={projeto.descricao}
           />
         ))}
-        
+
         {/* Mensagem quando nenhum projeto é encontrado */}
         {projetosFiltrados.length === 0 && (
           <div className="col-span-full text-center py-12">
